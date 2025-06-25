@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="name.css">
+    <script>
+
+
+        let checked_list = [];
+
+        function check_box_click(check_box) {
+
+            if (check_box.checked ) {
+                checked_list.push(check_box.id)
+            }else {
+                let index_elem = checked_list.indexOf(check_box.id)
+                checked_list.splice(index_elem, 1)
+
+            }
+
+        }
+
+        function read_goods(e) {
+            let result = e.target.response;
+            let html = JSON.parse(result);
+
+            document.getElementById("1").innerHTML = html;
+        }
+
+        function exec_get_query(url) {
+            let oReq = new XMLHttpRequest()
+            oReq.onload = read_goods
+            oReq.open("GET", url)
+            oReq.send()
+        }
+
+        function insert() {
+            name = document.getElementById("add_name").value
+            price = document.getElementById("add_price").value
+            comment = document.getElementById("add_comment").value
+
+            url = '/cgi-bin/insert.py?name=' + name + '&price=' + price + '&comment=' + comment
+            exec_get_query(url)
+        }
+
+        function start() {
+            exec_get_query('/cgi-bin/getgoods.py')
+        }
+
+        function del() {
+            _id = document.getElementById("del_id").value
+
+            url = '/cgi-bin/del.py?id=' + _id
+            exec_get_query(url)
+        }
+
+        function update() {
+            id = document.getElementById('update_id').value
+            name = document.getElementById("update_name").value
+            price = document.getElementById("update_price").value
+            comment = document.getElementById("update_comment").value
+
+            url = '/cgi-bin/update.py?id=' + id + '&name=' + name + '&price=' + price + '&comment=' + comment
+            exec_get_query(url)
+        }
+
+        function result_stat(e) {
+            let result = e.target.response;
+            let html = JSON.parse(result);
+
+            document.getElementById(html[1]).innerHTML = html[0];
+        }
+
+        function get_stat(fun_name, result_id, algorithm) {
+            let oReq = new XMLHttpRequest()
+
+            oReq.onload = result_stat
+            oReq.open('GET', '/cgi-bin/getstat_sql.py?fun_name=' + fun_name
+                + '&result_id=' + result_id
+                + '&algorithm=' + algorithm)
+            oReq.send()
+        }
+
+        function to_basket() {
+
+           if (checked_list.length === 0) {
+               alert('Alegeti produsele pe care le doriti sa le procurati !')
+           }else{
+               window.open('/cgi-bin/basket.py?goods=' + JSON.stringify(checked_list))
+           }
+
+        }
+
+    </script>
+</head>
+<body onload="start()">
+<p id="1"></p>
+<button id="2" onclick="get_stat('max', 2, 'sql')">Max SQL</button>
+<button id="3" onclick="get_stat('min', 3, 'sql')">Min SQL</button>
+<button id="4" onclick="get_stat('avg', 4, 'sql')">Avg SQL</button>
+<button id="5" onclick="get_stat('max', 5, 'py')">Max PY</button>
+<button id="6" onclick="get_stat('min', 6, 'py')">Min PY</button>
+<button id="7" onclick="get_stat('avg', 7, 'py')">AVG PY</button>
+
+<p>Add</p>
+Name = <input id="add_name"><br>
+Price = <input id="add_price"><br>
+Comm = <input id="add_comment"> <br>
+<button onclick="insert()">Adauga</button>
+
+<p>Delete</p>
+id = <input id="del_id"><br>
+<button onclick="del()">Delete</button>
+
+<p>Update</p>
+id = <input id="update_id">
+name = <input id="update_name">
+price = <input id="update_price">
+comm = <input id="update_comment">
+<button onclick="update()">Update</button>
+<br>
+<button onclick="to_basket()">In Cos !</button>
+
+</body>
+</html>
